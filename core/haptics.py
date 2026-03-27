@@ -8,7 +8,8 @@ redundant commands over the serial/USB connection, and safely limits output volt
 """
 
 import pyvisa
-from settings import *
+# UPDATED IMPORT: Points to the new core directory
+from core.settings import *
 
 class HapticController:
     """

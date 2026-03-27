@@ -11,11 +11,11 @@ via the HapticController.
 import pygame
 import os
 import sys
-from settings import *
-from haptics import HapticController
-from heart_mode import HeartMode
-from train_mode import TrainMode
-from texture_mode import TextureMode
+from core.settings import *
+from core.haptics import HapticController
+from modes.heart_mode import HeartMode
+from modes.train_mode import TrainMode
+from modes.texture_mode import TextureMode
 
 # Position the Pygame window on the screen using coordinates defined in settings.py.
 # Note: X_KOORDINATI and Y_KOORDINATI are Turkish for X_COORDINATE and Y_COORDINATE.

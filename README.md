@@ -42,11 +42,11 @@ cd EA-Demo
 
 **2. Install dependencies**
 ```bash
-pip install pygame pyvisa
+pip install -r requirements.txt
 ```
 
 **3. Configure your hardware**
-Open `settings.py` and update the `VISA_ADDRESS` to match your signal generator's IP address or connection string:
+Open `core/settings.py` and update the `VISA_ADDRESS` to match your signal generator's IP address or connection string:
 ```python
 VISA_ADDRESS = 'TCPIP0::169.254.2.20::inst0::INSTR'
 ```
@@ -66,9 +66,9 @@ python main.py
 
 ---
 
-## ⚙️ Configuration (`settings.py`)
+## ⚙️ Configuration (`core/settings.py`)
 
-Core parameters can be easily adjusted in the `settings.py` file without modifying the main logic:
+Core parameters can be easily adjusted in the `core/settings.py` file without modifying the main logic:
 * **Safety Limits**: Adjust the `MAX_VOLTAGE` output for the signal generator (remember to account for your amplifier's multiplier).
 * **Frequencies**: Change the default `CARRIER_FREQ`.
 * **Display**: Modify window resolution (`WIDTH`, `HEIGHT`) or invert touch axes (`INVERT_X`, `INVERT_Y`) if your hardware frame requires it.

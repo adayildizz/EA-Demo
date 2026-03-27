@@ -9,7 +9,7 @@ of rough sand and a segmented metal grid.
 
 import pygame
 import random
-from settings import *
+from core.settings import *
 
 class TextureMode:
     """

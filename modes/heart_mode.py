@@ -9,7 +9,7 @@ intervals tied to the system clock.
 
 import pygame
 import math
-from settings import *
+from core.settings import *
 
 class HeartMode:
     """
