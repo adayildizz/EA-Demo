@@ -17,6 +17,7 @@ from modes.heart_mode import HeartMode
 from modes.train_mode import TrainMode
 from modes.texture_mode import TextureMode
 from modes.pie_mode import PieMode
+from modes.bar_mode import BarMode
 
 # Position the Pygame window on the screen using coordinates defined in settings.py.
 # Note: X_KOORDINATI and Y_KOORDINATI are Turkish for X_COORDINATE and Y_COORDINATE.
@@ -37,6 +38,7 @@ mode_heart = HeartMode()
 mode_texture = TextureMode()
 mode_train = TrainMode()
 mode_pie = PieMode()
+mode_bar = BarMode()
 
 # Set the default application state to Heart Mode
 current_mode = mode_heart
@@ -82,12 +84,17 @@ while running:
                 elif mode_name == "TRAIN":
                     current_mode = mode_pie
                     mode_name = "PIE"
+                elif mode_name == "PIE":
+                    current_mode = mode_bar
+                    mode_name = "BAR"
                 else:
                     current_mode = mode_heart
                     mode_name = "HEART"
+        if hasattr(current_mode, 'handle_event'):
+            current_mode.handle_event(event)
                 
-                # Log the active mode change to the console
-                print(f"Mode: {mode_name}")
+        # Log the active mode change to the console
+        print(f"Mode: {mode_name}")
 
     # --- INPUT PROCESSING ---
     # Get the current mouse pointer coordinates

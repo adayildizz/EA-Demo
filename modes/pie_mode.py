@@ -54,7 +54,7 @@ class PieMode:
     # ------------------------------------------------------------------
     def load_preset(self, index: int):
         """Parse a preset dict into per-slice angle + frequency data."""
-        preset = PRESETS[index % len(PRESETS)]
+        preset = PIE_PRESETS[index % len(PIE_PRESETS)]
         self.title  = preset["title"]
         self.labels = preset["labels"]
         self.values = preset["values"]
