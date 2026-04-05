@@ -11,16 +11,24 @@ via the HapticController.
 import pygame
 import os
 import sys
+import argparse
 from core.settings import *
 from core.haptics import HapticController
 from modes.heart_mode import HeartMode
 from modes.train_mode import TrainMode
 from modes.texture_mode import TextureMode
 from modes.pie_mode import PieMode
+from modes.bar_mode import BarMode
+from modes.image_mode import ImageMode
 
 # Position the Pygame window on the screen using coordinates defined in settings.py.
 # Note: X_KOORDINATI and Y_KOORDINATI are Turkish for X_COORDINATE and Y_COORDINATE.
 os.environ['SDL_VIDEO_WINDOW_POS'] = f"{X_KOORDINATI},{Y_KOORDINATI}"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--image", type=str, default=None,
+                    help="Path to image file for image mode")
+args = parser.parse_args()
 
 # Initialize all imported pygame modules
 pygame.init()
@@ -37,6 +45,8 @@ mode_heart = HeartMode()
 mode_texture = TextureMode()
 mode_train = TrainMode()
 mode_pie = PieMode()
+mode_bar = BarMode()
+mode_image = ImageMode(image_path=args.image)
 
 # Set the default application state to Heart Mode
 current_mode = mode_heart
@@ -82,6 +92,12 @@ while running:
                 elif mode_name == "TRAIN":
                     current_mode = mode_pie
                     mode_name = "PIE"
+                elif mode_name == "PIE":
+                    current_mode = mode_bar
+                    mode_name = "BAR"
+                elif mode_name == "BAR":
+                    current_mode = mode_image
+                    mode_name = "IMAGE"
                 else:
                     current_mode = mode_heart
                     mode_name = "HEART"
