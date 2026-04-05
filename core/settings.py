@@ -82,3 +82,35 @@ COLOR_RAIL = (100, 100, 100)       # Steel grey for the train rails
 COLOR_SLEEPER = (139, 69, 19)      # Brown for the wooden railroad ties/sleepers
 COLOR_SKY = (20, 20, 40)           # Dark blue for the night sky
 COLOR_GROUND = (30, 30, 30)        # Dark grey/brown for the ground
+
+
+# Presets for pie graph 
+
+PRESETS = [
+    {
+        "title": "Türkiye Enerji Kaynakları",
+        "labels": ["Doğalgaz", "Kömür", "Yenilenebilir", "Nükleer", "Diğer"],
+        "values": [38, 27, 21, 8, 6]
+    },
+    {
+        "title": "Yaş Dağılımı",
+        "labels": ["0-14", "15-24", "25-54", "55-64", "65+"],
+        "values": [23, 16, 43, 10, 8]
+    },
+    {
+        "title": "Boş Zaman Aktiviteleri",
+        "labels": ["Müzik", "Spor", "Okuma", "Oyun", "Film", "Diğer"],
+        "values": [25, 20, 18, 15, 12, 10]
+    }
+]
+
+
+# Colors for Pie Mode 
+PIE_COLORS = [
+    (255, 99, 132),   # kırmızı
+    (54, 162, 235),   # mavi
+    (255, 206, 86),   # sarı
+    (75, 192, 192),   # teal
+    (153, 102, 255),  # mor
+    (255, 159, 64),   # turuncu
+]

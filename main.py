@@ -16,6 +16,7 @@ from core.haptics import HapticController
 from modes.heart_mode import HeartMode
 from modes.train_mode import TrainMode
 from modes.texture_mode import TextureMode
+from modes.pie_mode import PieMode
 
 # Position the Pygame window on the screen using coordinates defined in settings.py.
 # Note: X_KOORDINATI and Y_KOORDINATI are Turkish for X_COORDINATE and Y_COORDINATE.
@@ -35,6 +36,7 @@ haptics = HapticController()
 mode_heart = HeartMode()
 mode_texture = TextureMode()
 mode_train = TrainMode()
+mode_pie = PieMode()
 
 # Set the default application state to Heart Mode
 current_mode = mode_heart
@@ -77,6 +79,9 @@ while running:
                 elif mode_name == "TEXTURE":
                     current_mode = mode_train
                     mode_name = "TRAIN"
+                elif mode_name == "TRAIN":
+                    current_mode = mode_pie
+                    mode_name = "PIE"
                 else:
                     current_mode = mode_heart
                     mode_name = "HEART"
