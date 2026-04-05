@@ -101,11 +101,9 @@ while running:
                 else:
                     current_mode = mode_heart
                     mode_name = "HEART"
-        if hasattr(current_mode, 'handle_event'):
-            current_mode.handle_event(event)
                 
-        # Log the active mode change to the console
-        print(f"Mode: {mode_name}")
+                # Log the active mode change to the console
+                print(f"Mode: {mode_name}")
 
     # --- INPUT PROCESSING ---
     # Get the current mouse pointer coordinates
