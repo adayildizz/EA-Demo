@@ -40,9 +40,14 @@ X_KOORDINATI = -1920
 Y_KOORDINATI = 0
 
 # Screen resolution dimensions
-WIDTH = 1920
-HEIGHT = 1080
+# WIDTH = 1920
+# HEIGHT = 1080
+import pygame
+pygame.init()
 
+info = pygame.display.Info()
+WIDTH = info.current_w
+HEIGHT = info.current_h
 # Input inversion flags. If the physical touch panel maps coordinates 
 # backwards compared to the display, set these to True to flip the axes.
 INVERT_X = True
