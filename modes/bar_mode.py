@@ -196,13 +196,11 @@ class BarMode:
 
                     # Choose output
                     if self.border_spike:
-                        elapsed = current_time - self.spike_timer
-                        if elapsed < 20:
-                            target_volt = MIN_VOLTAGE
-                            target_freq = CARRIER_FREQ
-                        else:
-                            target_volt = MAX_VOLTAGE
-                            target_freq = 250
+                        target_volt = MAX_VOLTAGE
+                        target_freq = CARRIER_FREQ
+                    else:
+                        target_freq = b["freq"]
+                        target_volt = TOUCH_VOLT
                 else:
                     # Finger is above the bar top — no feedback
                     self.prev_bar = -1
