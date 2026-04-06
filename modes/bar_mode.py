@@ -58,7 +58,7 @@ CHART_BOTTOM      = 800   # Y coordinate of the bar baseline
 CHART_TOP         = 120   # Y coordinate of the tallest possible bar top
 BAR_GAP           = 12    # gap between bars (px)
 SPIKE_MS          = 80    # boundary spike duration (ms)
-TOUCH_VOLT        = 3.0   # voltage while inside a bar
+TOUCH_VOLT        = 4.0   # voltage while inside a bar
 
 
 class BarMode:
