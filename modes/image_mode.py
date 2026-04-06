@@ -128,7 +128,7 @@ class ImageMode:
         """
         # 1. Resize
         img_resized = cv2.resize(img_rgb, (WIDTH, HEIGHT),
-                                 interpolation=cv2.INTER_LINEAR)
+                                 interpolation=cv2.INTER_CUBIC)
 
         # 2. Greyscale → frequency map
         grey = cv2.cvtColor(img_resized, cv2.COLOR_RGB2GRAY)  # 0–255
@@ -139,11 +139,12 @@ class ImageMode:
 
         # 3. Edge map via Canny
         # Slight Gaussian blur first to reduce noise-induced false edges
-        blurred         = cv2.GaussianBlur(grey, (5, 5), 0)
-        self.edge_map   = cv2.Canny(blurred,
-                                    EDGE_THRESHOLD_LOW,
-                                    EDGE_THRESHOLD_HIGH)  # binary 0 / 255
-
+        edges_combined = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
+        for channel in cv2.split(img_resized):
+            blurred = cv2.GaussianBlur(channel, (5, 5), 0)
+            edges = cv2.Canny(blurred, EDGE_THRESHOLD_LOW, EDGE_THRESHOLD_HIGH)
+            edges_combined = cv2.bitwise_or(edges_combined, edges)
+        self.edge_map = edges_combined
         # Kenarları şişir — mouse ile test ederken daha kolay yakalanır
         self.edge_map = cv2.dilate(
             self.edge_map, np.ones((3, 3), np.uint8), iterations=2)
