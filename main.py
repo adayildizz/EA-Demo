@@ -101,10 +101,14 @@ while running:
                 else:
                     current_mode = mode_heart
                     mode_name = "HEART"
-                
+
                 # Log the active mode change to the console
                 print(f"Mode: {mode_name}")
 
+        if hasattr(current_mode, 'handle_event'):
+            current_mode.handle_event(event)
+
+        
     # --- INPUT PROCESSING ---
     # Get the current mouse pointer coordinates
     mouse_x, mouse_y = pygame.mouse.get_pos()
