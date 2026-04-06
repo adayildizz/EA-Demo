@@ -13,6 +13,55 @@ import pygame
 import math
 from core.settings import *
 
+<<<<<<< Updated upstream
+=======
+# ---------------------------------------------------------------------------
+# Preset Datasets
+# ---------------------------------------------------------------------------
+PRESETS = [
+    {
+        "title": "Aylık Ortalama Sıcaklık (İstanbul, °C)",
+        "labels": ["Oca", "Şub", "Mar", "Nis", "May", "Haz",
+                   "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
+        "values": [6, 7, 9, 14, 19, 24, 27, 27, 23, 17, 13, 8],
+    },
+    {
+        "title": "Haftalık Egzersiz Süresi (Dakika)",
+        "labels": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
+        "values": [45, 30, 60, 0, 50, 90, 20],
+    },
+    {
+        "title": "Programlama Dili Popülaritesi (%)",
+        "labels": ["Python", "JS", "Java", "C++", "C#", "Rust"],
+        "values": [30, 25, 18, 12, 10, 5],
+    },
+]
+
+# Colour palette for bars — cycles if there are more bars than colours
+BAR_COLORS = [
+    ( 54, 162, 235),   # blue
+    (255,  99, 132),   # red
+    ( 75, 192, 192),   # teal
+    (255, 206,  86),   # yellow
+    (153, 102, 255),   # purple
+    (255, 159,  64),   # orange
+    ( 46, 204, 113),   # green
+    (231,  76,  60),   # dark red
+    ( 52, 152, 219),   # light blue
+    (155,  89, 182),   # violet
+    ( 26, 188, 156),   # turquoise
+    (241, 196,  15),   # gold
+]
+
+# Layout constants
+CHART_LEFT        = 120   # left margin (px) — room for Y axis labels
+CHART_RIGHT_PAD   = 60    # right margin (px)
+CHART_BOTTOM      = 800   # Y coordinate of the bar baseline
+CHART_TOP         = 120   # Y coordinate of the tallest possible bar top
+BAR_GAP           = 12    # gap between bars (px)
+SPIKE_MS          = 50    # boundary spike duration (ms)
+TOUCH_VOLT        = 4.0   # voltage while inside a bar
+>>>>>>> Stashed changes
 
 
 class BarMode:
@@ -150,8 +199,15 @@ class BarMode:
 
                     # Choose output
                     if self.border_spike:
-                        target_volt = MAX_VOLTAGE
-                        target_freq = CARRIER_FREQ
+                        elapsed = current_time - self.spike_timer
+                        if elapsed < 15:
+                            # Çok kısa sessizlik — kontrast için
+                            target_volt = MIN_VOLTAGE
+                            target_freq = CARRIER_FREQ
+                        else:
+                            # Güçlü spike
+                            target_volt = MAX_VOLTAGE
+                            target_freq = 300
                     else:
                         target_freq = b["freq"]
                         target_volt = TOUCH_VOLT
