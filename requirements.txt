@@ -5,3 +5,4 @@ pygame>=2.0.0
 
 # Used for VISA communication with the signal generator hardware
 pyvisa>=1.11.3
+opencv-python

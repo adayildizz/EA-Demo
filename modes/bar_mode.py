@@ -13,8 +13,6 @@ import pygame
 import math
 from core.settings import *
 
-<<<<<<< Updated upstream
-=======
 # ---------------------------------------------------------------------------
 # Preset Datasets
 # ---------------------------------------------------------------------------
@@ -59,9 +57,8 @@ CHART_RIGHT_PAD   = 60    # right margin (px)
 CHART_BOTTOM      = 800   # Y coordinate of the bar baseline
 CHART_TOP         = 120   # Y coordinate of the tallest possible bar top
 BAR_GAP           = 12    # gap between bars (px)
-SPIKE_MS          = 50    # boundary spike duration (ms)
+SPIKE_MS          = 80    # boundary spike duration (ms)
 TOUCH_VOLT        = 4.0   # voltage while inside a bar
->>>>>>> Stashed changes
 
 
 class BarMode:
@@ -105,7 +102,7 @@ class BarMode:
     # ------------------------------------------------------------------
     def load_preset(self, index: int):
         """Compute bar rectangles and haptic frequencies from a preset."""
-        preset = BAR_PRESETS[index % len(BAR_PRESETS)]
+        preset = PRESETS[index % len(PRESETS)]
         self.title  = preset["title"]
         self.labels = preset["labels"]
         self.values = preset["values"]
@@ -199,15 +196,8 @@ class BarMode:
 
                     # Choose output
                     if self.border_spike:
-                        elapsed = current_time - self.spike_timer
-                        if elapsed < 15:
-                            # Çok kısa sessizlik — kontrast için
-                            target_volt = MIN_VOLTAGE
-                            target_freq = CARRIER_FREQ
-                        else:
-                            # Güçlü spike
-                            target_volt = MAX_VOLTAGE
-                            target_freq = 300
+                        target_volt = MAX_VOLTAGE
+                        target_freq = CARRIER_FREQ
                     else:
                         target_freq = b["freq"]
                         target_volt = TOUCH_VOLT
