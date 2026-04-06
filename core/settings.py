@@ -36,7 +36,7 @@ WAVE_NOISE = 'NOIS'    # Noise wave (typically used for rough textures like sand
 # ==========================================
 # Initial window position. Using a negative X value (e.g., -1920) is often used 
 # to spawn the window on a secondary monitor located to the left of the main display.
-X_KOORDINATI = -1920
+X_KOORDINATI = 0
 Y_KOORDINATI = 0
 
 # Screen resolution dimensions

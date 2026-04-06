@@ -28,7 +28,7 @@ class PieMode:
     Range: 30 Hz (largest possible) … 200 Hz (smallest possible)
     """
     SPIKE_MS   = 80     # how long the boundary spike lasts (ms)
-    TOUCH_VOLT = 3.0    # voltage while inside a slice
+    TOUCH_VOLT = 4.0    # voltage while inside a slice
     def __init__(self):
         self.center = (WIDTH // 2, HEIGHT // 2)
         # Leave room for labels — use the shorter screen dimension

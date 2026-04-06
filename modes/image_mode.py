@@ -30,7 +30,7 @@ EDGE_THRESHOLD_LOW  = 30    # Canny lower threshold
 EDGE_THRESHOLD_HIGH = 100   # Canny upper threshold
 EDGE_VOLT           = MAX_VOLTAGE   # voltage spike on edge
 EDGE_SPIKE_MS       = 150           # how long the edge spike lasts (ms)
-TOUCH_VOLT          = 2.5           # base voltage while touching
+TOUCH_VOLT          = 4.0          # base voltage while touching
 FREQ_MIN            = 30            # Hz — darkest pixel
 FREQ_MAX            = 200           # Hz — brightest pixel
 
