@@ -10,7 +10,6 @@ Preset datasets can be switched with the 1 / 2 / 3 keys.
 """
 
 import pygame
-import math
 from core.settings import *
 
 # ---------------------------------------------------------------------------
@@ -18,20 +17,19 @@ from core.settings import *
 # ---------------------------------------------------------------------------
 PRESETS = [
     {
-        "title": "Aylık Ortalama Sıcaklık (İstanbul, °C)",
-        "labels": ["Oca", "Şub", "Mar", "Nis", "May", "Haz",
-                   "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
-        "values": [6, 7, 9, 14, 19, 24, 27, 27, 23, 17, 13, 8],
+        "title": "Dataset 1",
+        "labels": ["A", "B", "C"],
+        "values": [20, 65, 90],
     },
     {
-        "title": "Haftalık Egzersiz Süresi (Dakika)",
-        "labels": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
-        "values": [45, 30, 60, 0, 50, 90, 20],
+        "title": "Dataset 2",
+        "labels": ["A", "B", "C"],
+        "values": [80, 30, 55],
     },
     {
-        "title": "Programlama Dili Popülaritesi (%)",
-        "labels": ["Python", "JS", "Java", "C++", "C#", "Rust"],
-        "values": [30, 25, 18, 12, 10, 5],
+        "title": "Dataset 3",
+        "labels": ["A", "B", "C"],
+        "values": [45, 10, 75],
     },
 ]
 
@@ -51,15 +49,49 @@ BAR_COLORS = [
     (241, 196,  15),   # gold
 ]
 
-# Layout constants
-CHART_LEFT        = 120   # left margin (px) — room for Y axis labels
-CHART_RIGHT_PAD   = 60    # right margin (px)
-CHART_BOTTOM      = 800   # Y coordinate of the bar baseline
-CHART_TOP         = 120   # Y coordinate of the tallest possible bar top
+# Layout constants — chart occupies centre half (width) × 2/3 (height) of screen
+CHART_LEFT        = WIDTH  // 4 + 50   # bars start here; Y labels sit to the left
+CHART_RIGHT_PAD   = WIDTH  // 4        # right margin so right edge = 3/4 of screen
+CHART_BOTTOM      = HEIGHT * 5 // 6   # baseline of bars
+CHART_TOP         = HEIGHT // 6        # top of tallest bar
 BAR_GAP           = 12    # gap between bars (px)
 SPIKE_MS          = 80    # boundary spike duration (ms)
-TOUCH_VOLT        = 4.0   # voltage while inside a bar
 
+
+
+
+# ---------------------------------------------------------------------------
+# Haptic Config Functions
+# Each function takes (value, max_val) and returns (target_freq, target_volt)
+# ---------------------------------------------------------------------------
+
+def frequency_config(value: float, max_val: float):
+    """Frequency varies with bar height; voltage stays constant at 3.0 V."""
+    target_freq = 50 + int((value / max_val) * 200)    # 50–250 Hz
+    target_volt = 3.0                                   # sabit
+    return target_freq, target_volt
+
+
+def amplitude_config(value: float, max_val: float):
+    """Voltage varies with bar height; frequency stays constant."""
+    target_freq = CARRIER_FREQ                          # 125 Hz sabit
+    target_volt = 1.0 + (value / max_val) * 3.0        # 1.0–4.0 V
+    return target_freq, target_volt
+
+
+def texture_config(value: float, max_val: float, current_time: int):
+    """Pulse speed proportional to bar height — short bar: slow pulse, tall bar: fast pulse."""
+    target_freq = CARRIER_FREQ                          # 125 Hz sabit
+
+    # pulse_period inversely proportional to value: yüksek bar → kısa period → hızlı pulse
+    max_period  = 400                                   # ms — en yavaş (kısa bar)
+    min_period  = 60                                    # ms — en hızlı (uzun bar)
+    pulse_period = int(max_period - (value / max_val) * (max_period - min_period))
+
+    target_volt = 4.0 if (current_time % pulse_period) < (pulse_period // 2) else MIN_VOLTAGE
+    return target_freq, target_volt
+
+# ---------------------------------------------------------------------------
 
 class BarMode:
     """
@@ -92,6 +124,12 @@ class BarMode:
         self.prev_bar    = -1
         self.border_spike = False
         self.spike_timer  = 0
+        self.has_spike = True
+        self.spike_type = 0 # for amplitude 
+
+        # Haptic config
+        self.config_index = 0
+        self.config_names = ["Frequency", "Amplitude", "Texture"]
 
         # Load first preset
         self.preset_index = 0
@@ -123,22 +161,11 @@ class BarMode:
             self.bars.append({
                 "rect" : pygame.Rect(bar_x, bar_y, bar_w, bar_h),
                 "value": val,
-                "freq" : self._value_to_freq(val, max_val),
                 "color": BAR_COLORS[i % len(BAR_COLORS)],
             })
 
         # Keep bar_w for hit-testing columns (finger X only)
         self.bar_w = bar_w
-
-    @staticmethod
-    def _value_to_freq(value: float, max_val: float) -> int:
-        """
-        Map a bar's value to a haptic frequency.
-        Tallest bar → 200 Hz, shortest bar → 30 Hz.
-        """
-        ratio = value / max_val        # 0.0 … 1.0
-        freq  = 30 + int(ratio * 170)  # 30 Hz … 200 Hz
-        return max(30, min(200, freq))
 
     # ------------------------------------------------------------------
     # Hit testing
@@ -170,8 +197,9 @@ class BarMode:
         self.active_bar = -1
 
         # Count down the boundary spike
-        if self.border_spike and (current_time - self.spike_timer) > SPIKE_MS:
-            self.border_spike = False
+        if self.has_spike:
+            if self.border_spike and (current_time - self.spike_timer) > SPIKE_MS:
+                self.border_spike = False
 
         if finger_pos:
             fx, fy = finger_pos
@@ -187,27 +215,51 @@ class BarMode:
                     self.active_bar = col
 
                     # Detect column crossing → trigger spike
-                    if (self.active_bar != self.prev_bar
-                            and self.prev_bar != -1):
-                        self.border_spike = True
-                        self.spike_timer  = current_time
+                    if self.has_spike:
+                        if (self.active_bar != self.prev_bar
+                                and self.prev_bar != -1):
+                            self.border_spike = True
+                            self.spike_timer  = current_time
 
                     self.prev_bar = self.active_bar
 
                     # Choose output
-                    if self.border_spike:
-                        target_volt = MAX_VOLTAGE
-                        target_freq = CARRIER_FREQ
+                    if self.has_spike and self.border_spike:
+                        if self.spike_type == 1:
+                            # Frequency spike: frekansı override et, voltajı config'den al
+                            val     = b["value"]
+                            max_val = max(self.values)
+                            if self.config_index == 0:
+                                _, target_volt = frequency_config(val, max_val)
+                            elif self.config_index == 1:
+                                _, target_volt = amplitude_config(val, max_val)
+                            else:
+                                _, target_volt = texture_config(val, max_val, current_time)
+                            target_freq = 300
+                        else:
+                            # Amplitude spike: voltajı MAX'a çek, frekans sabit
+                            target_volt = MAX_VOLTAGE
+                            target_freq = CARRIER_FREQ
+
                     else:
-                        target_freq = b["freq"]
-                        target_volt = TOUCH_VOLT
+                        val     = b["value"]
+                        max_val = max(self.values)
+                        if self.config_index == 0:
+                            target_freq, target_volt = frequency_config(val, max_val)
+                        elif self.config_index == 1:
+                            target_freq, target_volt = amplitude_config(val, max_val)
+                        else:
+                            target_freq, target_volt = texture_config(val, max_val, current_time)
                 else:
                     # Finger is above the bar top — no feedback
                     self.prev_bar = -1
             else:
-                # Outside chart columns
-                self.prev_bar = -1
+                # Outside chart columns — only reset prev_bar if spike is disabled
+                if not self.has_spike:
+                    self.prev_bar = -1
 
+        self.last_freq = target_freq
+        self.last_volt = target_volt
         return (WAVE_SQUARE, target_freq, target_volt)
 
     # ------------------------------------------------------------------
@@ -216,6 +268,7 @@ class BarMode:
     def handle_event(self, event):
         """Call this from main.py's event loop."""
         if event.type == pygame.KEYDOWN:
+            # Preset switching — 1 / 2 / 3
             if event.key == pygame.K_1:
                 self.preset_index = 0
                 self.load_preset(0)
@@ -225,6 +278,19 @@ class BarMode:
             elif event.key == pygame.K_3:
                 self.preset_index = 2
                 self.load_preset(2)
+            # Haptic config switching — Q / W / E
+            elif event.key == pygame.K_q:
+                self.config_index = 0
+            elif event.key == pygame.K_w:
+                self.config_index = 1
+            elif event.key == pygame.K_e:
+                self.config_index = 2
+            elif event.key == pygame.K_s:
+                self.has_spike = not self.has_spike
+            elif event.key == pygame.K_0:
+                self.spike_type = 0
+            elif event.key == pygame.K_9:
+                self.spike_type = 1
 
     # ------------------------------------------------------------------
     # Draw
@@ -287,7 +353,7 @@ class BarMode:
             b    = self.bars[self.active_bar]
             info = self.font_info.render(
                 f"► {self.labels[self.active_bar]}  —  "
-                f"{b['value']}  —  {b['freq']} Hz",
+                f"{b['value']}  —  {self.last_freq} Hz  —  {self.last_volt:.2f} V",
                 True, COLOR_WHITE,
             )
             bg = pygame.Surface(
@@ -298,9 +364,23 @@ class BarMode:
             screen.blit(bg, bg_rect)
             screen.blit(info, info.get_rect(center=(WIDTH // 2, HEIGHT - 80)))
 
+        # ── Active config indicator ──────────────────────────────────
+        config_surf = self.font_info.render(
+            f"Haptic: {self.config_names[self.config_index]}",
+            True, (120, 220, 120),
+        )
+        screen.blit(config_surf, config_surf.get_rect(topleft=(CHART_LEFT, CHART_TOP - 48)))
+
+        # ── Spike indicator ──────────────────────────────────────────
+        spike_type_name = "Amplitude" if self.spike_type == 0 else "Frequency"
+        spike_label = f"Spike: {'ON' if self.has_spike else 'OFF'}  [{spike_type_name}]"
+        spike_color = (120, 220, 120) if self.has_spike else (220, 80, 80)
+        spike_surf  = self.font_info.render(spike_label, True, spike_color)
+        screen.blit(spike_surf, spike_surf.get_rect(topleft=(CHART_LEFT, CHART_TOP - 48 + 36)))
+
         # ── Hint bar ─────────────────────────────────────────────────
         hint = self.font_hint.render(
-            "1 / 2 / 3  →  farklı veri seti          ENTER  →  mod değiştir",
+            "1/2/3  →  veri seti     Q/W/E  →  haptic config     S  →  spike on/off     0/9  →  spike type     ENTER  →  mod değiştir",
             True, (170, 170, 170),
         )
         screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT - 36)))
