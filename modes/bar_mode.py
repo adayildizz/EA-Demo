@@ -57,6 +57,7 @@ CHART_BOTTOM      = HEIGHT * 5 // 6   # baseline of bars
 CHART_TOP         = HEIGHT // 6        # top of tallest bar
 BAR_GAP           = 12    # gap between bars (px)
 SPIKE_MS          = 80    # boundary spike duration (ms)
+HAS_SPIKE         = True
 
 
 
@@ -208,8 +209,9 @@ class BarMode:
         self.last_volt = target_volt
 
         # Count down the boundary spike
-        if self.border_spike and (current_time - self.spike_timer) > SPIKE_MS:
-            self.border_spike = False
+        if HAS_SPIKE:
+            if self.border_spike and (current_time - self.spike_timer) > SPIKE_MS:
+                self.border_spike = False
 
         if finger_pos:
             fx, fy = finger_pos
@@ -225,15 +227,16 @@ class BarMode:
                     self.active_bar = col
 
                     # Detect column crossing → trigger spike
-                    if (self.active_bar != self.prev_bar
-                            and self.prev_bar != -1):
-                        self.border_spike = True
-                        self.spike_timer  = current_time
+                    if HAS_SPIKE:
+                        if (self.active_bar != self.prev_bar
+                                and self.prev_bar != -1):
+                            self.border_spike = True
+                            self.spike_timer  = current_time
 
                     self.prev_bar = self.active_bar
 
                     # Choose output
-                    if self.border_spike:
+                    if HAS_SPIKE and self.border_spike:
                         target_volt = MAX_VOLTAGE
                         target_freq = CARRIER_FREQ
                     else:
