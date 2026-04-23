@@ -60,6 +60,41 @@ SPIKE_MS          = 80    # boundary spike duration (ms)
 TOUCH_VOLT        = 4.0   # voltage while inside a bar
 
 
+# ---------------------------------------------------------------------------
+# Haptic Config Functions
+# Each function takes (value, max_val) and returns (target_freq, target_volt)
+# ---------------------------------------------------------------------------
+
+def frequency_config(value: float, max_val: float):
+    """Frequency varies with bar height; voltage stays constant."""
+    target_freq = 30 + int((value / max_val) * 170)   # 30–200 Hz
+    target_volt = TOUCH_VOLT                            # sabit
+    return target_freq, target_volt
+
+def amplitude_config(value: float, max_val: float):
+    """Voltage varies with bar height; frequency stays constant."""
+    target_freq = CARRIER_FREQ                              # sabit
+    target_volt = 0.5 + (value / max_val) * 3.5            # 0.5–4.0 V
+    return target_freq, target_volt
+
+
+def texture_config(value: float, max_val: float, current_time: int):
+    """Pulse pattern varies with bar height — low: steady, mid: slow pulse, high: fast pulse."""
+    target_freq = CARRIER_FREQ                              # sabit
+
+    if value < max_val * 0.33:
+        target_volt = TOUCH_VOLT                            # sürekli
+    elif value < max_val * 0.66:
+        pulse_period = 200
+        target_volt = TOUCH_VOLT if (current_time % pulse_period) < 100 else MIN_VOLTAGE
+    else:
+        pulse_period = 60
+        target_volt = TOUCH_VOLT if (current_time % pulse_period) < 30 else MIN_VOLTAGE
+
+    return target_freq, target_volt
+
+# ---------------------------------------------------------------------------
+
 class BarMode:
     """
     Interactive bar-chart haptic mode.
@@ -91,6 +126,10 @@ class BarMode:
         self.prev_bar    = -1
         self.border_spike = False
         self.spike_timer  = 0
+
+        # Haptic config
+        self.config_index = 0
+        self.config_names = ["Frequency", "Amplitude", "Texture"]
 
         # Load first preset
         self.preset_index = 0
@@ -198,8 +237,14 @@ class BarMode:
                         target_volt = MAX_VOLTAGE
                         target_freq = CARRIER_FREQ
                     else:
-                        target_freq = b["freq"]
-                        target_volt = TOUCH_VOLT
+                        val     = b["value"]
+                        max_val = max(self.values)
+                        if self.config_index == 0:
+                            target_freq, target_volt = frequency_config(val, max_val)
+                        elif self.config_index == 1:
+                            target_freq, target_volt = amplitude_config(val, max_val)
+                        else:
+                            target_freq, target_volt = texture_config(val, max_val, current_time)
                 else:
                     # Finger is above the bar top — no feedback
                     self.prev_bar = -1
@@ -215,6 +260,7 @@ class BarMode:
     def handle_event(self, event):
         """Call this from main.py's event loop."""
         if event.type == pygame.KEYDOWN:
+            # Preset switching — 1 / 2 / 3
             if event.key == pygame.K_1:
                 self.preset_index = 0
                 self.load_preset(0)
@@ -224,6 +270,13 @@ class BarMode:
             elif event.key == pygame.K_3:
                 self.preset_index = 2
                 self.load_preset(2)
+            # Haptic config switching — Q / W / E
+            elif event.key == pygame.K_q:
+                self.config_index = 0
+            elif event.key == pygame.K_w:
+                self.config_index = 1
+            elif event.key == pygame.K_e:
+                self.config_index = 2
 
     # ------------------------------------------------------------------
     # Draw
@@ -297,9 +350,16 @@ class BarMode:
             screen.blit(bg, bg_rect)
             screen.blit(info, info.get_rect(center=(WIDTH // 2, HEIGHT - 80)))
 
+        # ── Active config indicator ──────────────────────────────────
+        config_surf = self.font_info.render(
+            f"Haptic: {self.config_names[self.config_index]}",
+            True, (120, 220, 120),
+        )
+        screen.blit(config_surf, config_surf.get_rect(topleft=(CHART_LEFT, CHART_TOP - 48)))
+
         # ── Hint bar ─────────────────────────────────────────────────
         hint = self.font_hint.render(
-            "1 / 2 / 3  →  farklı veri seti          ENTER  →  mod değiştir",
+            "1/2/3  →  veri seti     Q/W/E  →  haptic config     ENTER  →  mod değiştir",
             True, (170, 170, 170),
         )
         screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT - 36)))
