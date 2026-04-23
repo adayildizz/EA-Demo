@@ -31,6 +31,25 @@ PRESETS = [
         "labels": ["A", "B", "C"],
         "values": [45, 10, 75],
     },
+    {
+        "title": "Dataset 4",
+        "labels": ["A", "B", "C"],
+        "values": [5, 65, 30],
+    },{
+        "title": "Dataset 5",
+        "labels": ["A", "B", "C"],
+        "values": [5, 20, 60],
+    },{
+        "title": "Dataset 6",
+        "labels": ["A", "B", "C"],
+        "values": [90, 30, 75],
+    },{
+        "title": "Dataset 7",
+        "labels": ["A", "B", "C"],
+        "values": [20, 80, 40],
+    },
+    
+
 ]
 
 # Colour palette for bars — cycles if there are more bars than colours
