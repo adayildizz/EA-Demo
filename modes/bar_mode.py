@@ -18,20 +18,19 @@ from core.settings import *
 # ---------------------------------------------------------------------------
 PRESETS = [
     {
-        "title": "Aylık Ortalama Sıcaklık (İstanbul, °C)",
-        "labels": ["Oca", "Şub", "Mar", "Nis", "May", "Haz",
-                   "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
-        "values": [6, 7, 9, 14, 19, 24, 27, 27, 23, 17, 13, 8],
+        "title": "Dataset 1",
+        "labels": ["A", "B", "C"],
+        "values": [20, 65, 90],
     },
     {
-        "title": "Haftalık Egzersiz Süresi (Dakika)",
-        "labels": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
-        "values": [45, 30, 60, 0, 50, 90, 20],
+        "title": "Dataset 2",
+        "labels": ["A", "B", "C"],
+        "values": [80, 30, 55],
     },
     {
-        "title": "Programlama Dili Popülaritesi (%)",
-        "labels": ["Python", "JS", "Java", "C++", "C#", "Rust"],
-        "values": [30, 25, 18, 12, 10, 5],
+        "title": "Dataset 3",
+        "labels": ["A", "B", "C"],
+        "values": [45, 10, 75],
     },
 ]
 
