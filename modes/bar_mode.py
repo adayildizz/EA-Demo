@@ -50,11 +50,11 @@ BAR_COLORS = [
     (241, 196,  15),   # gold
 ]
 
-# Layout constants
-CHART_LEFT        = 120   # left margin (px) — room for Y axis labels
-CHART_RIGHT_PAD   = 60    # right margin (px)
-CHART_BOTTOM      = 800   # Y coordinate of the bar baseline
-CHART_TOP         = 120   # Y coordinate of the tallest possible bar top
+# Layout constants — chart occupies centre half (width) × 2/3 (height) of screen
+CHART_LEFT        = WIDTH  // 4 + 50   # bars start here; Y labels sit to the left
+CHART_RIGHT_PAD   = WIDTH  // 4        # right margin so right edge = 3/4 of screen
+CHART_BOTTOM      = HEIGHT * 5 // 6   # baseline of bars
+CHART_TOP         = HEIGHT // 6        # top of tallest bar
 BAR_GAP           = 12    # gap between bars (px)
 SPIKE_MS          = 80    # boundary spike duration (ms)
 TOUCH_VOLT        = 4.0   # voltage while inside a bar
