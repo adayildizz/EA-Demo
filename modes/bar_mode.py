@@ -367,8 +367,8 @@ class BarMode:
         screen.blit(config_surf, config_surf.get_rect(topleft=(CHART_LEFT, CHART_TOP - 48)))
 
         # ── Spike indicator ──────────────────────────────────────────
-        spike_label = "Spike: ON" if HAS_SPIKE else "Spike: OFF"
-        spike_color = (120, 220, 120) if HAS_SPIKE else (220, 80, 80)
+        spike_label = "Spike: ON" if self.has_spike else "Spike: OFF"
+        spike_color = (120, 220, 120) if self.has_spike else (220, 80, 80)
         spike_surf  = self.font_info.render(spike_label, True, spike_color)
         screen.blit(spike_surf, spike_surf.get_rect(topleft=(CHART_LEFT, CHART_TOP - 48 + 36)))
 
