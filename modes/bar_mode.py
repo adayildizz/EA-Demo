@@ -252,8 +252,9 @@ class BarMode:
                     # Finger is above the bar top — no feedback
                     self.prev_bar = -1
             else:
-                # Outside chart columns
-                self.prev_bar = -1
+                # Outside chart columns — only reset prev_bar if spike is disabled
+                if not HAS_SPIKE:
+                    self.prev_bar = -1
 
         self.last_freq = target_freq
         self.last_volt = target_volt
