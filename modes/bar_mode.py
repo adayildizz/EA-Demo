@@ -57,7 +57,7 @@ CHART_BOTTOM      = HEIGHT * 5 // 6   # baseline of bars
 CHART_TOP         = HEIGHT // 6        # top of tallest bar
 BAR_GAP           = 12    # gap between bars (px)
 SPIKE_MS          = 80    # boundary spike duration (ms)
-HAS_SPIKE         = True
+
 
 
 
@@ -126,6 +126,7 @@ class BarMode:
         self.border_spike = False
         self.spike_timer  = 0
         self.has_spike = True
+        self.spike_type = 0 # for amplitude 
 
         # Haptic config
         self.config_index = 0
@@ -238,8 +239,22 @@ class BarMode:
 
                     # Choose output
                     if self.has_spike and self.border_spike:
-                        target_volt = MAX_VOLTAGE
-                        target_freq = CARRIER_FREQ
+                        if self.spike_type == 1:
+                            # Frequency spike: frekansı override et, voltajı config'den al
+                            val     = b["value"]
+                            max_val = max(self.values)
+                            if self.config_index == 0:
+                                _, target_volt = frequency_config(val, max_val)
+                            elif self.config_index == 1:
+                                _, target_volt = amplitude_config(val, max_val)
+                            else:
+                                _, target_volt = texture_config(val, max_val, current_time)
+                            target_freq = 300
+                        else:
+                            # Amplitude spike: voltajı MAX'a çek, frekans sabit
+                            target_volt = MAX_VOLTAGE
+                            target_freq = CARRIER_FREQ
+
                     else:
                         val     = b["value"]
                         max_val = max(self.values)
@@ -286,6 +301,10 @@ class BarMode:
                 self.config_index = 2
             elif event.key == pygame.K_s:
                 self.has_spike = not self.has_spike
+            elif event.key == pygame.K_0:
+                self.spike_type = 0
+            elif event.key == pygame.K_9:
+                self.spike_type = 1
 
     # ------------------------------------------------------------------
     # Draw
@@ -367,14 +386,15 @@ class BarMode:
         screen.blit(config_surf, config_surf.get_rect(topleft=(CHART_LEFT, CHART_TOP - 48)))
 
         # ── Spike indicator ──────────────────────────────────────────
-        spike_label = "Spike: ON" if self.has_spike else "Spike: OFF"
+        spike_type_name = "Amplitude" if self.spike_type == 0 else "Frequency"
+        spike_label = f"Spike: {'ON' if self.has_spike else 'OFF'}  [{spike_type_name}]"
         spike_color = (120, 220, 120) if self.has_spike else (220, 80, 80)
         spike_surf  = self.font_info.render(spike_label, True, spike_color)
         screen.blit(spike_surf, spike_surf.get_rect(topleft=(CHART_LEFT, CHART_TOP - 48 + 36)))
 
         # ── Hint bar ─────────────────────────────────────────────────
         hint = self.font_hint.render(
-            "1/2/3  →  veri seti     Q/W/E  →  haptic config     ENTER  →  mod değiştir",
+            "1/2/3  →  veri seti     Q/W/E  →  haptic config     S  →  spike on/off     0/9  →  spike type     ENTER  →  mod değiştir",
             True, (170, 170, 170),
         )
         screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT - 36)))
