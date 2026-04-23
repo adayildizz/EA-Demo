@@ -125,6 +125,7 @@ class BarMode:
         self.prev_bar    = -1
         self.border_spike = False
         self.spike_timer  = 0
+        self.has_spike = True
 
         # Haptic config
         self.config_index = 0
@@ -209,7 +210,7 @@ class BarMode:
         self.last_volt = target_volt
 
         # Count down the boundary spike
-        if HAS_SPIKE:
+        if self.has_spike:
             if self.border_spike and (current_time - self.spike_timer) > SPIKE_MS:
                 self.border_spike = False
 
@@ -227,7 +228,7 @@ class BarMode:
                     self.active_bar = col
 
                     # Detect column crossing → trigger spike
-                    if HAS_SPIKE:
+                    if self.has_spike:
                         if (self.active_bar != self.prev_bar
                                 and self.prev_bar != -1):
                             self.border_spike = True
@@ -236,7 +237,7 @@ class BarMode:
                     self.prev_bar = self.active_bar
 
                     # Choose output
-                    if HAS_SPIKE and self.border_spike:
+                    if self.has_spike and self.border_spike:
                         target_volt = MAX_VOLTAGE
                         target_freq = CARRIER_FREQ
                     else:
@@ -253,7 +254,7 @@ class BarMode:
                     self.prev_bar = -1
             else:
                 # Outside chart columns — only reset prev_bar if spike is disabled
-                if not HAS_SPIKE:
+                if not self.has_spike:
                     self.prev_bar = -1
 
         self.last_freq = target_freq
@@ -283,6 +284,8 @@ class BarMode:
                 self.config_index = 1
             elif event.key == pygame.K_e:
                 self.config_index = 2
+            elif event.key == pygame.K_s:
+                self.has_spike = not self.has_spike
 
     # ------------------------------------------------------------------
     # Draw
