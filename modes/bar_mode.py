@@ -204,6 +204,8 @@ class BarMode:
         target_freq = CARRIER_FREQ
         target_volt = MIN_VOLTAGE
         self.active_bar = -1
+        self.last_freq = target_freq
+        self.last_volt = target_volt
 
         # Count down the boundary spike
         if self.border_spike and (current_time - self.spike_timer) > SPIKE_MS:
@@ -250,6 +252,8 @@ class BarMode:
                 # Outside chart columns
                 self.prev_bar = -1
 
+        self.last_freq = target_freq
+        self.last_volt = target_volt
         return (WAVE_SQUARE, target_freq, target_volt)
 
     # ------------------------------------------------------------------
@@ -337,7 +341,7 @@ class BarMode:
             b    = self.bars[self.active_bar]
             info = self.font_info.render(
                 f"► {self.labels[self.active_bar]}  —  "
-                f"{b['value']}  —  {b['freq']} Hz",
+                f"{b['value']}  —  {self.last_freq} Hz  —  {self.last_volt:.2f} V",
                 True, COLOR_WHITE,
             )
             bg = pygame.Surface(
