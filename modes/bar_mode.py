@@ -67,7 +67,7 @@ TOUCH_VOLT        = 4.0   # voltage while inside a bar
 
 def frequency_config(value: float, max_val: float):
     """Frequency varies with bar height; voltage stays constant."""
-    target_freq = 30 + int((value / max_val) * 170)   # 30–200 Hz
+    target_freq = 50 + int((value / max_val) * 200)   # 30–200 Hz
     target_volt = TOUCH_VOLT                            # sabit
     return target_freq, target_volt
 
