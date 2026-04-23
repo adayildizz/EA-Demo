@@ -10,7 +10,6 @@ Preset datasets can be switched with the 1 / 2 / 3 keys.
 """
 
 import pygame
-import math
 from core.settings import *
 
 # ---------------------------------------------------------------------------
@@ -162,22 +161,11 @@ class BarMode:
             self.bars.append({
                 "rect" : pygame.Rect(bar_x, bar_y, bar_w, bar_h),
                 "value": val,
-                "freq" : self._value_to_freq(val, max_val),
                 "color": BAR_COLORS[i % len(BAR_COLORS)],
             })
 
         # Keep bar_w for hit-testing columns (finger X only)
         self.bar_w = bar_w
-
-    @staticmethod
-    def _value_to_freq(value: float, max_val: float) -> int:
-        """
-        Map a bar's value to a haptic frequency.
-        Tallest bar → 200 Hz, shortest bar → 30 Hz.
-        """
-        ratio = value / max_val        # 0.0 … 1.0
-        freq  = 30 + int(ratio * 170)  # 30 Hz … 200 Hz
-        return max(30, min(200, freq))
 
     # ------------------------------------------------------------------
     # Hit testing
@@ -207,8 +195,6 @@ class BarMode:
         target_freq = CARRIER_FREQ
         target_volt = MIN_VOLTAGE
         self.active_bar = -1
-        self.last_freq = target_freq
-        self.last_volt = target_volt
 
         # Count down the boundary spike
         if self.has_spike:
