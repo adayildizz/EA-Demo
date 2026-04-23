@@ -57,7 +57,7 @@ CHART_BOTTOM      = HEIGHT * 5 // 6   # baseline of bars
 CHART_TOP         = HEIGHT // 6        # top of tallest bar
 BAR_GAP           = 12    # gap between bars (px)
 SPIKE_MS          = 80    # boundary spike duration (ms)
-TOUCH_VOLT        = 4.0   # voltage while inside a bar
+
 
 
 # ---------------------------------------------------------------------------
@@ -66,31 +66,29 @@ TOUCH_VOLT        = 4.0   # voltage while inside a bar
 # ---------------------------------------------------------------------------
 
 def frequency_config(value: float, max_val: float):
-    """Frequency varies with bar height; voltage stays constant."""
-    target_freq = 50 + int((value / max_val) * 200)   # 30–200 Hz
-    target_volt = TOUCH_VOLT                            # sabit
+    """Frequency varies with bar height; voltage stays constant at 3.0 V."""
+    target_freq = 50 + int((value / max_val) * 200)    # 50–250 Hz
+    target_volt = 3.0                                   # sabit
     return target_freq, target_volt
+
 
 def amplitude_config(value: float, max_val: float):
     """Voltage varies with bar height; frequency stays constant."""
-    target_freq = CARRIER_FREQ                              # sabit
-    target_volt = 0.5 + (value / max_val) * 3.5            # 0.5–4.0 V
+    target_freq = CARRIER_FREQ                          # 125 Hz sabit
+    target_volt = 1.0 + (value / max_val) * 3.0        # 1.0–4.0 V
     return target_freq, target_volt
 
 
 def texture_config(value: float, max_val: float, current_time: int):
-    """Pulse pattern varies with bar height — low: steady, mid: slow pulse, high: fast pulse."""
-    target_freq = CARRIER_FREQ                              # sabit
+    """Pulse speed proportional to bar height — short bar: slow pulse, tall bar: fast pulse."""
+    target_freq = CARRIER_FREQ                          # 125 Hz sabit
 
-    if value < max_val * 0.33:
-        target_volt = TOUCH_VOLT                            # sürekli
-    elif value < max_val * 0.66:
-        pulse_period = 200
-        target_volt = TOUCH_VOLT if (current_time % pulse_period) < 100 else MIN_VOLTAGE
-    else:
-        pulse_period = 60
-        target_volt = TOUCH_VOLT if (current_time % pulse_period) < 30 else MIN_VOLTAGE
+    # pulse_period inversely proportional to value: yüksek bar → kısa period → hızlı pulse
+    max_period  = 400                                   # ms — en yavaş (kısa bar)
+    min_period  = 60                                    # ms — en hızlı (uzun bar)
+    pulse_period = int(max_period - (value / max_val) * (max_period - min_period))
 
+    target_volt = 4.0 if (current_time % pulse_period) < (pulse_period // 2) else MIN_VOLTAGE
     return target_freq, target_volt
 
 # ---------------------------------------------------------------------------
