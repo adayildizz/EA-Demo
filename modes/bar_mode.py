@@ -31,6 +31,25 @@ PRESETS = [
         "labels": ["A", "B", "C"],
         "values": [45, 10, 75],
     },
+    {
+        "title": "Dataset 4",
+        "labels": ["A", "B", "C"],
+        "values": [5, 65, 30],
+    },{
+        "title": "Dataset 5",
+        "labels": ["A", "B", "C"],
+        "values": [5, 20, 60],
+    },{
+        "title": "Dataset 6",
+        "labels": ["A", "B", "C"],
+        "values": [90, 30, 75],
+    },{
+        "title": "Dataset 7",
+        "labels": ["A", "B", "C"],
+        "values": [20, 80, 40],
+    },
+    
+
 ]
 
 # Colour palette for bars — cycles if there are more bars than colours
@@ -120,12 +139,14 @@ class BarMode:
         self.font_axis   = pygame.font.SysFont("Arial", 18)
 
         # Runtime state
-        self.active_bar  = -1
-        self.prev_bar    = -1
-        self.border_spike = False
-        self.spike_timer  = 0
-        self.has_spike = True
-        self.spike_type = 0 # for amplitude 
+        self.active_bar       = -1
+        self.prev_bar         = -1
+        self.border_spike     = False
+        self.spike_timer      = 0
+        self.has_spike        = True
+        self.spike_type       = 0       # 0: amplitude, 1: frequency
+        self.prev_col         = -1      # önceki column (bar yüksekliğinden bağımsız)
+        self.prev_inside_bar  = False   # önceki framede bar içinde miydi
 
         # Haptic config
         self.config_index = 0
@@ -211,17 +232,23 @@ class BarMode:
                 # Is the finger below the bar top (inside the bar area)?
                 finger_inside_bar = fy >= b["rect"].top and fy <= CHART_BOTTOM
 
+                if self.has_spike:
+                    # 1. Yatay geçiş — column sınırını geç (bar yüksekliğinden bağımsız)
+                    if col != self.prev_col and self.prev_col != -1:
+                        self.border_spike = True
+                        self.spike_timer  = current_time
+
+                    # 2. Bar üst kenarı — dikey hareketle barın tepesinden giriş
+                    if finger_inside_bar and not self.prev_inside_bar:
+                        self.border_spike = True
+                        self.spike_timer  = current_time
+
+                self.prev_col        = col
+                self.prev_inside_bar = finger_inside_bar
+
                 if finger_inside_bar:
                     self.active_bar = col
-
-                    # Detect column crossing → trigger spike
-                    if self.has_spike:
-                        if (self.active_bar != self.prev_bar
-                                and self.prev_bar != -1):
-                            self.border_spike = True
-                            self.spike_timer  = current_time
-
-                    self.prev_bar = self.active_bar
+                    self.prev_bar   = self.active_bar
 
                     # Choose output
                     if self.has_spike and self.border_spike:
@@ -254,9 +281,11 @@ class BarMode:
                     # Finger is above the bar top — no feedback
                     self.prev_bar = -1
             else:
-                # Outside chart columns — only reset prev_bar if spike is disabled
+                # Outside chart columns
                 if not self.has_spike:
                     self.prev_bar = -1
+                self.prev_col        = -1
+                self.prev_inside_bar = False
 
         self.last_freq = target_freq
         self.last_volt = target_volt
